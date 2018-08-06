@@ -19,4 +19,5 @@ public class CartProductVo {
     private Integer productChecked;//此商品是否勾选
 
     private String limitQuantity;//限制数量的一个返回结果
+
 }
