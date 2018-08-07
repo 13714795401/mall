@@ -2,11 +2,11 @@ package com.nmall.service.impl;
 
 import com.nmall.common.Const;
 import com.nmall.common.ServerResponse;
-import com.nmall.common.TokenCache;
 import com.nmall.dao.UserMapper;
 import com.nmall.pojo.User;
 import com.nmall.service.IUserService;
 import com.nmall.util.MD5Util;
+import com.nmall.util.RedisPoolUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -90,7 +90,7 @@ public class UserServiceImpl implements IUserService {
         int resultCount = userMapper.checkAnswer(username, question, answer);
         if (resultCount > 0) {
             String forgerToken = UUID.randomUUID().toString();
-            TokenCache.setKey(TokenCache.TOKEN_PREFIX + username, forgerToken);
+            RedisPoolUtil.setEx(Const.TOKEN_PREFIX + username, forgerToken, 60 * 60);
             return ServerResponse.createBySuccess(forgerToken);
         }
         return ServerResponse.createByErrorMessage("问题的答案错误");
@@ -105,7 +105,7 @@ public class UserServiceImpl implements IUserService {
             return ServerResponse.createByErrorMessage("用户不存在");
         }
 
-        String token = TokenCache.getKey(TokenCache.TOKEN_PREFIX + username);
+        String token = RedisPoolUtil.get(Const.TOKEN_PREFIX + username);
         if (StringUtils.isBlank(token)) {
             return ServerResponse.createByErrorMessage("token无效或过期");
         }
